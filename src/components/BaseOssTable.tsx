@@ -17,9 +17,6 @@ export type OSSC = {
   name: string;
   region: string;
   zone: string;
-  woreda: string;
-  houseNumber: string;
-  phoneNumber: string;
 };
 
 export default function BaseOssTable({

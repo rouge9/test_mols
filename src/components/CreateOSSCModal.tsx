@@ -9,16 +9,14 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Loader, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { useQuery } from "@apollo/client";
+import { useMutation, useQuery } from "@apollo/client";
 import {
   GET_BASE_REGIONS,
   GET_BASE_SUB_CITY,
@@ -26,6 +24,7 @@ import {
   Get_SUB_CITY,
 } from "@/quaries";
 import { useState } from "react";
+import { INSERT_BASE_OSSC } from "@/mutations";
 
 export default function CreateOSSCModal() {
   const { loading, error, data } = useQuery(GET_BASE_REGIONS);
@@ -33,9 +32,6 @@ export default function CreateOSSCModal() {
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [selectedSubcity, setSelectedSubcity] = useState<string | null>(null);
   const [selectedWoreda, setSelectedWoreda] = useState<string | null>(null);
-
-  if (loading) return <p>Loading regions...</p>;
-  if (error) return <p>Error fetching regions: {error.message}</p>;
 
   const whereWereda = selectedSubcity
     ? { subcity_id: { _eq: selectedSubcity } }
@@ -60,9 +56,29 @@ export default function CreateOSSCModal() {
   } = useQuery(GET_BASE_WEREDA, {
     variables: { whereWereda },
   });
+  const [createOSSC, { loading: postLoading }] = useMutation(INSERT_BASE_OSSC);
 
-  console.log(subcityData);
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const data = {
+      name: e.currentTarget["occs-name"].value,
+      region_id: selectedRegion,
+      subcity_id: selectedSubcity,
+      woreda_id: selectedWoreda,
+      description: e.currentTarget["description"].value,
+      houseNumber: e.currentTarget["house-number"].value,
+      phoneNumber: e.currentTarget["phone-number"].value,
+    };
+    console.log(data);
+    createOSSC({
+      variables: {
+        ...data,
+      },
+    });
+  };
 
+  if (loading) return <p>Loading regions...</p>;
+  if (error) return <p>Error fetching regions: {error.message}</p>;
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -72,122 +88,126 @@ export default function CreateOSSCModal() {
       </DialogTrigger>
       <DialogContent className="w-full sm:max-w-[1000px] p-12">
         <DialogHeader></DialogHeader>
-        <form className="grid gap-4 py-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="occs-name" className="text-muted-foreground">
-                OCCS Name *
-              </Label>
-              <Input
-                id="occs-name"
-                placeholder="Enter name"
-                className="border-muted py-7 rounded-lg "
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="region" className="text-muted-foreground">
-                Region *
-              </Label>
-              <Select onValueChange={setSelectedRegion}>
-                <SelectTrigger className="border-muted py-7 rounded-lg ">
-                  <SelectValue placeholder="Select a region" />
-                </SelectTrigger>
-                <SelectContent>
-                  {data.base_regions.map(
-                    (region: { id: string; name: string }) => (
-                      <SelectItem key={region.id} value={region.id}>
-                        {region.name}{" "}
-                      </SelectItem>
-                    )
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="description" className="text-muted-foreground">
-              Description
-            </Label>
-            <Textarea
-              id="description"
-              placeholder="Write description"
-              className="border-muted py-7 rounded-lg "
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="zone" className="text-muted-foreground">
-                Zone or Sub city *
-              </Label>
-              <Select onValueChange={setSelectedSubcity}>
-                <SelectTrigger
-                  id="zone"
+        {postLoading ? (
+          <Loader />
+        ) : (
+          <form className="grid gap-4 py-4" onSubmit={handleSubmit}>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="occs-name" className="text-muted-foreground">
+                  OCCS Name *
+                </Label>
+                <Input
+                  id="occs-name"
+                  placeholder="Enter name"
                   className="border-muted py-7 rounded-lg "
-                >
-                  <SelectValue placeholder="Select zone" />
-                </SelectTrigger>
-                <SelectContent>
-                  {subcityData?.base_subcity.map(
-                    (subcity: { id: string; name: string }) => (
-                      <SelectItem key={subcity.id} value={subcity.id}>
-                        {subcity.name}{" "}
-                      </SelectItem>
-                    )
-                  )}
-                </SelectContent>
-              </Select>
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="region" className="text-muted-foreground">
+                  Region *
+                </Label>
+                <Select onValueChange={setSelectedRegion}>
+                  <SelectTrigger className="border-muted py-7 rounded-lg ">
+                    <SelectValue placeholder="Select a region" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {data.base_regions.map(
+                      (region: { id: string; name: string }) => (
+                        <SelectItem key={region.id} value={region.id}>
+                          {region.name}{" "}
+                        </SelectItem>
+                      )
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="woreda" className="text-muted-foreground">
-                Woreda or District *
+              <Label htmlFor="description" className="text-muted-foreground">
+                Description
               </Label>
-              <Select onValueChange={setSelectedWoreda}>
-                <SelectTrigger
-                  id="woreda"
+              <Textarea
+                id="description"
+                placeholder="Write description"
+                className="border-muted py-7 rounded-lg "
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="zone" className="text-muted-foreground">
+                  Zone or Sub city *
+                </Label>
+                <Select onValueChange={setSelectedSubcity}>
+                  <SelectTrigger
+                    id="zone"
+                    className="border-muted py-7 rounded-lg "
+                  >
+                    <SelectValue placeholder="Select zone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {subcityData?.base_subcity.map(
+                      (subcity: { id: string; name: string }) => (
+                        <SelectItem key={subcity.id} value={subcity.id}>
+                          {subcity.name}{" "}
+                        </SelectItem>
+                      )
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="woreda" className="text-muted-foreground">
+                  Woreda or District *
+                </Label>
+                <Select onValueChange={setSelectedWoreda}>
+                  <SelectTrigger
+                    id="woreda"
+                    className="border-muted py-7 rounded-lg "
+                  >
+                    <SelectValue placeholder="Select woreda" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {woredaData?.base_woreda.map(
+                      (woreda: { id: string; name: string }) => (
+                        <SelectItem key={woreda.id} value={woreda.id}>
+                          {woreda.name}{" "}
+                        </SelectItem>
+                      )
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="house-number" className="text-muted-foreground">
+                  House Number *
+                </Label>
+                <Input
+                  id="house-number"
+                  placeholder="Enter house number"
                   className="border-muted py-7 rounded-lg "
-                >
-                  <SelectValue placeholder="Select woreda" />
-                </SelectTrigger>
-                <SelectContent>
-                  {woredaData?.base_woreda.map(
-                    (woreda: { id: string; name: string }) => (
-                      <SelectItem key={woreda.id} value={woreda.id}>
-                        {woreda.name}{" "}
-                      </SelectItem>
-                    )
-                  )}
-                </SelectContent>
-              </Select>
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="phone-number" className="text-muted-foreground">
+                  Phone Number *
+                </Label>
+                <Input
+                  id="phone-number"
+                  placeholder="Enter phone number"
+                  className="border-muted py-7 rounded-lg "
+                />
+              </div>
             </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="grid gap-2">
-              <Label htmlFor="house-number" className="text-muted-foreground">
-                House Number *
-              </Label>
-              <Input
-                id="house-number"
-                placeholder="Enter house number"
-                className="border-muted py-7 rounded-lg "
-              />
+            <div className="flex justify-end items-end">
+              <Button type="submit" className="px-16 py-6 bg-blue-500">
+                Create
+              </Button>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="phone-number" className="text-muted-foreground">
-                Phone Number *
-              </Label>
-              <Input
-                id="phone-number"
-                placeholder="Enter phone number"
-                className="border-muted py-7 rounded-lg "
-              />
-            </div>
-          </div>
-          <div className="flex justify-end items-end">
-            <Button type="submit" className="px-16 py-6 bg-blue-500">
-              Create
-            </Button>
-          </div>
-        </form>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );

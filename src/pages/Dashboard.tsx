@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
 import { columns, data } from "@/lib/helpers/data";
+import { GET_OSSC_Table } from "@/quaries";
+import { useQuery } from "@apollo/client";
 import { Search, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -16,6 +18,7 @@ export default function Dashboard() {
     navigate("/login");
   };
   const email = localStorage.getItem("email");
+  // const { loading, error, data } = useQuery(GET_OSSC_Table);
 
   return (
     <div className="flex h-screen bg-blue-700">
