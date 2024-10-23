@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Phone } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { gql, useMutation } from "@apollo/client";
 import { useAuth } from "@/context/AuthContext";
+import { Label } from "./ui/label";
+import { Lock, Phone } from "lucide-react";
 
 const SIGN_IN_MUTATION = gql`
   mutation SignIn($password: String!, $phoneNumber: String!) {
@@ -46,24 +47,41 @@ const LoginForm: React.FC = () => {
       <div className="max-w-md w-full mx-auto">
         <h2 className="text-3xl font-bold mb-6">Login</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="relative w-full md:w-auto">
-            {/* <Phone className="w-6 h-6" /> */}
-            <Input
-              type="tel"
-              placeholder="Phone number"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              className="w-full px-3 py-8 border-muted rounded-full"
-            />
+          <div className="space-y-2">
+            <Label htmlFor="phone" className="sr-only">
+              Phone number
+            </Label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <Phone className="h-5 w-5 text-gray-400" />
+              </div>
+              <Input
+                type="tel"
+                placeholder="Phone number"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                className="w-full pl-10 py-8 border-muted rounded-full"
+                required
+              />
+            </div>
           </div>
-          <div>
-            <Input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-8 border-muted rounded-full"
-            />
+          <div className="space-y-2">
+            <Label htmlFor="password" className="sr-only">
+              Password
+            </Label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <Lock className="h-5 w-5 text-gray-400" />
+              </div>
+              <Input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full pl-10 py-8 border-muted rounded-full"
+                required
+              />
+            </div>
           </div>
 
           <Button

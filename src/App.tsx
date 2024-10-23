@@ -1,12 +1,18 @@
-import { Route, BrowserRouter as Router, Routes, Navigate } from "react-router-dom";
+import {
+  Route,
+  BrowserRouter as Router,
+  Routes,
+  Navigate,
+} from "react-router-dom";
 import Dashboard from "@/pages/Dashboard";
-import Login from "@/components/Login";
 import LoginPage from "@/pages/LoginPage";
 import { ApolloProvider } from "@apollo/client";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { client } from "@/apolloClient";
 
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const { isAuthenticated } = useAuth();
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
 };

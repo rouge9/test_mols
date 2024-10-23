@@ -27,21 +27,24 @@ import {
 } from "@/quaries";
 import { useState } from "react";
 
-interface WoredaSelectProps {
-  onChange: (value: string) => void;
-  where?: { [key: string]: any }; // Optional filter for the query
-}
-
 export default function CreateOSSCModal() {
   const { loading, error, data } = useQuery(GET_BASE_REGIONS);
 
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const [selectedSubcity, setSelectedSubcity] = useState<string | null>(null);
   const [selectedWoreda, setSelectedWoreda] = useState<string | null>(null);
+
   if (loading) return <p>Loading regions...</p>;
   if (error) return <p>Error fetching regions: {error.message}</p>;
-  const whereWereda = selectedSubcity ? { subcity_id: { _eq: selectedSubcity } } : {};
-  const whereSubcity = selectedRegion ? { region_id: { _eq: selectedRegion } } : {};
+
+  const whereWereda = selectedSubcity
+    ? { subcity_id: { _eq: selectedSubcity } }
+    : {};
+
+  const whereSubcity = selectedRegion
+    ? { region_id: { _eq: selectedRegion } }
+    : {};
+
   const {
     loading: subcityLoading,
     error: subcityError,
@@ -49,6 +52,7 @@ export default function CreateOSSCModal() {
   } = useQuery(Get_SUB_CITY, {
     variables: { where: whereSubcity },
   });
+
   const {
     loading: woredaLoading,
     error: woredaError,
@@ -66,7 +70,7 @@ export default function CreateOSSCModal() {
           <Plus className="mr-2 h-4 w-4" /> Create OSSC
         </Button>
       </DialogTrigger>
-      <DialogContent className="w-full sm:max-w-[1000px]">
+      <DialogContent className="w-full sm:max-w-[1000px] p-12">
         <DialogHeader></DialogHeader>
         <form className="grid gap-4 py-4">
           <div className="grid grid-cols-2 gap-4">
@@ -85,15 +89,17 @@ export default function CreateOSSCModal() {
                 Region *
               </Label>
               <Select onValueChange={setSelectedRegion}>
-                <SelectTrigger>
+                <SelectTrigger className="border-muted py-7 rounded-lg ">
                   <SelectValue placeholder="Select a region" />
                 </SelectTrigger>
                 <SelectContent>
-                  {data.base_regions.map((region: { id: string; name: string }) => (
-                    <SelectItem key={region.id} value={region.id}>
-                      {region.name}{" "}
-                    </SelectItem>
-                  ))}
+                  {data.base_regions.map(
+                    (region: { id: string; name: string }) => (
+                      <SelectItem key={region.id} value={region.id}>
+                        {region.name}{" "}
+                      </SelectItem>
+                    )
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -114,7 +120,10 @@ export default function CreateOSSCModal() {
                 Zone or Sub city *
               </Label>
               <Select onValueChange={setSelectedSubcity}>
-                <SelectTrigger id="zone">
+                <SelectTrigger
+                  id="zone"
+                  className="border-muted py-7 rounded-lg "
+                >
                   <SelectValue placeholder="Select zone" />
                 </SelectTrigger>
                 <SelectContent>
@@ -133,15 +142,20 @@ export default function CreateOSSCModal() {
                 Woreda or District *
               </Label>
               <Select onValueChange={setSelectedWoreda}>
-                <SelectTrigger id="woreda">
+                <SelectTrigger
+                  id="woreda"
+                  className="border-muted py-7 rounded-lg "
+                >
                   <SelectValue placeholder="Select woreda" />
                 </SelectTrigger>
                 <SelectContent>
-                  {woredaData?.base_woreda.map((woreda: { id: string; name: string }) => (
-                    <SelectItem key={woreda.id} value={woreda.id}>
-                      {woreda.name}{" "}
-                    </SelectItem>
-                  ))}
+                  {woredaData?.base_woreda.map(
+                    (woreda: { id: string; name: string }) => (
+                      <SelectItem key={woreda.id} value={woreda.id}>
+                        {woreda.name}{" "}
+                      </SelectItem>
+                    )
+                  )}
                 </SelectContent>
               </Select>
             </div>
